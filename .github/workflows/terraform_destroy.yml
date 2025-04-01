@@ -1,19 +1,26 @@
 name: 'Terraform Destroy'
 on:
-  workflow_dispatch:  # This enables the manual trigger
+  workflow_dispatch:  # Manual trigger only
 
 env:
-  TF_VERSION: latest  # or specify a version like "1.5.5"
+  AWS_REGION: ap-southeast-1
+  TF_VERSION: latest  # Define Terraform version
 
 jobs:
-  terraform-destroy:
-    name: 'Terraform Destroy'
+  destroy:
     runs-on: ubuntu-latest
-    environment: production  # optional, but recommended for production resources
+    environment: production
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -21,14 +28,7 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
 
       - name: Terraform Init
-        id: init
         run: terraform init
 
       - name: Terraform Destroy
-        id: destroy
         run: terraform destroy -auto-approve
-        env:
-          # If you're using any sensitive variables, pass them here
-          # AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          # AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          # Or any other required environment variables
