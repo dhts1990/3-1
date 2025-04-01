@@ -12,5 +12,4 @@ terraform {
 
 resource "aws_s3_bucket" "example" {
   bucket = "huang-demo-3-1"
-  acl    = "private"
 }
